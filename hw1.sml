@@ -29,4 +29,30 @@ fun dates_in_month(dates : (int*int*int) list, month : int) =
     else if #2 (hd dates) = month
     then [#2 (hd dates)] :: dates_in_month(tl dates, month)
     else dates_in_month(tl dates, month)
+
+fun dates_in_months(dates : (int*int*int) list, months : int list) =
+    if null months
+    then []
+    else dates_in_month(dates, hd months) :: dates_in_motns(dates, tl months)
+
+
+fun get_nth(l_stirngs : string list, n : int) =
+    if n = 1
+    then hd l_strings
+    else get_nth(tl l_strings, n -1)
+
+fun date_to_string(date : int*int*int) =
+    let val month = #2 date
+	val year = #1 date
+	val day = #3 date
+	val day_year = Int.toString(day) ^ "," ^  " " ^ Int.toString(year)
+	val month_strings = ["Januaury", "February", "March", "April", "May",
+			     "June", "July", "August", "September", "October",
+			     "November", "December"]
+    in
+	get_nth(month_strings, month) ^ " " ^ day_year
+    end
+
+fun number_before_reaching_sum(sum : int, ns : int list) =
+    
 					  
