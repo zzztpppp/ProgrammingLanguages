@@ -1,4 +1,4 @@
-fun is_order(d1: int*int*int, d2: int*int*int) =
+fun is_older(d1: int*int*int, d2: int*int*int) =
     if (#1 d1) > (#1 d2)
     then true
     else if (#2 d1) > (#2 d2)
@@ -54,5 +54,42 @@ fun date_to_string(date : int*int*int) =
     end
 
 fun number_before_reaching_sum(sum : int, ns : int list) =
-    
+    let fun help(sum : int, ns : int list, sum_before : int) =
+	    if sum_before + hd ns < sum
+	    then 1 + help(sum, tl ns, sum_before + hd ns)
+	    else 0
+    in
+	help(sum , ns, 0)
+    end
+
+fun what_month(day : int ) =
+    let val days_of_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 ,31]
+    in
+	number_before_reaching_sum(days_of_month, day)
+    end
+
+fun month_range(day1 : int, day2 : int) =
+    let val month1 = what_month(day1)
+	val month2 = what_month(day2 + 1)
+	fun range(from : int, to : int) =
+	    if from = to
+	    then []
+	    else [from] :: range(from - 1, to)
+    in
+	range(month1, month2)
+    end
+
+fun oldest(dates : (int*int*int) list) =
+    if null dates
+    then NONE
+    else
+	let fun get_oldest(date : int*int*int, dates : (int*int*int) list) =
+		if is_older(date, hd dates)
+		then is_older(date, tl dates)
+		else if  not is_older(date, hd dates)
+		then is_older(hd dates, tl dates)
+		else if null dates
+		then SOME(date)
+    end
+	    
 					  
