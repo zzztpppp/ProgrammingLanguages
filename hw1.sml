@@ -54,7 +54,7 @@ fun date_to_string(date : int*int*int) =
 	val year = #1 date
 	val day = #3 date
 	val day_year = Int.toString(day) ^ "," ^  " " ^ Int.toString(year)
-	val month_strings = ["Januaury", "February", "March", "April", "May",
+	val month_strings = ["January", "February", "March", "April", "May",
 			     "June", "July", "August", "September", "October",
 			     "November", "December"]
     in
