@@ -1,11 +1,19 @@
 fun is_older(d1: int*int*int, d2: int*int*int) =
-    if (#1 d1) > (#1 d2)
+    if (#1 d1) < (#1 d2)
     then true
-    else if (#2 d1) > (#2 d2)
-    then true
-    else if (#3 d1) > (#3 d2)
-    then true
-    else false
+    else if (#1 d1) > (#1 d2)
+    then false
+    else
+	if (#2 d1) < (#2 d2)
+	then true
+	else if (#2 d1) > (#2 d2)
+	then false
+	else
+	    if (#3 d1) < (#3 d2)
+	    then true
+	    else if (#3 d1) > (#3 d2)
+	    then false
+	    else false
 
 fun number_in_month(dates : (int*int*int) list, month : int) =
     if null dates
@@ -27,13 +35,13 @@ fun dates_in_month(dates : (int*int*int) list, month : int) =
     if null dates
     then []
     else if #2 (hd dates) = month
-    then [#2 (hd dates)] :: dates_in_month(tl dates, month)
+    then [(hd dates)] @  dates_in_month(tl dates, month)
     else dates_in_month(tl dates, month)
 
 fun dates_in_months(dates : (int*int*int) list, months : int list) =
     if null months
     then []
-    else (dates_in_month(dates, hd months)) :: (dates_in_months(dates, tl months))
+    else (dates_in_month(dates, hd months)) @ (dates_in_months(dates, tl months))
 
 
 fun get_nth(l_strings : string list, n : int) =
@@ -65,19 +73,26 @@ fun number_before_reaching_sum(sum : int, ns : int list) =
 fun what_month(day : int ) =
     let val days_of_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 ,31]
     in
-	number_before_reaching_sum(day, days_of_month)
+	number_before_reaching_sum(day, days_of_month) + 1
     end
 
 fun month_range(day1 : int, day2 : int) =
-    let val month1 = what_month(day1)
-	val month2 = what_month(day2 + 1)
-	fun range(from : int, to : int) =
-	    if from = to
-	    then []
-	    else [from] :: range(from - 1, to)
-    in
-	range(month1, month2)
-    end
+    if day1 > day2
+    then []
+    else what_month(day1) :: month_range(day1 + 1, day2)
 
-	    
-					  
+fun oldest(dates : (int*int*int) list) =
+    if null dates
+    then NONE
+    else let val old = hd dates
+	     val old_left = oldest(tl dates)
+	 in
+	     if isSome(old_left)
+	     then
+		 if is_older(old, valOf(old_left))
+		 then SOME(old)
+		 else old_left
+	     else
+		 SOME(old)
+	 end
+				       
