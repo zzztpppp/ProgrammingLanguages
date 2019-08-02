@@ -95,4 +95,60 @@ fun oldest(dates : (int*int*int) list) =
 	     else
 		 SOME(old)
 	 end
+
+fun is_in(num : int, l : int list) =
+    (* Check if a given number is in l *)
+    if null l
+    then false
+    else
+	if (hd l) = num
+	then true
+	else is_in(num , tl l)
+
+fun remove_duplicates(l) =
+    (* Remove the duplicated value in l *)
+    let fun sift(unique_list : int list, origin_list : int list) =
+	    if null origin_list
+	    then unique_list
+	    else if not(is_in( hd origin_list, unique_list))
+	    then sift((hd origin_list) :: unique_list, tl origin_list)
+	    else
+		sift(unique_list, tl origin_list)
+    in
+	sift([], l)
+    end
+
+fun number_in_months_challenge(dates : (int*int*int) list, month : int list) =
+    let val unique_month = remove_duplicates month
+    in
+	number_in_months(dates, unique_month)
+    end
+
+fun reasonable_date(date : int*int*int) =
+    let val year = #1 date
+	val month = #2 date
+	val days = #3 date
+	val tmp1 = ((year mod 4) = 0)
+	val tmp2 = ((year mod 100) <> 0)
+	val tmp3 = ((year mod 400) = 0)
+	val is_leap = tmp1 orelse (tmp2 andalso tmp3)
+	val thirty1_days = [1,3,5,7,8,10,12]
+	val thirty_days = [4,6,9,11]
+		  
+    in
+	if (year > 0) andalso month >=1 andalso month <= 12 andalso days > 0 andalso days <=31
+	then
+	    if  is_in(month, thirty1_days)
+	    then days <= 31
+	    else if  is_in(month, thirty_days)
+	    then days <= 30
+	    else if is_leap andalso month = 2
+	    then days <= 29
+	    else days <= 28
+	else false
+    end		
+   
+
+
+
 				       
