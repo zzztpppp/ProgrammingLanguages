@@ -46,7 +46,21 @@ fun get_substitutions2(x, y) =
     in
 	recur_aux(x, y, [])
     end
-									  
+
+(* Problem 1d *)
+fun similar_names(names_list, name) =
+    let val {first=f, middle=m, last=l} = name
+	val similar_first_names = get_substitutions2(names_list, f)
+	fun aux(similar_first_names, similar_names_list) =
+	    case similar_first_names of
+		[] => similar_names_list
+	      | x'::xs => aux(xs, ({first=x', middle=m, last=l})::similar_names_list)
+    in
+	aux(similar_first_names, [name])
+    end
+
+
+					       
 (* you may assume that Num is always used with values 2, 3, ..., 10
    though it will not really come up *)
 datatype suit = Clubs | Diamonds | Hearts | Spades
