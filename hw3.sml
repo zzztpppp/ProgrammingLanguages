@@ -90,5 +90,29 @@ fun all_answers f x =
 	  | (_, x') => SOME x'
     end
 
+(* Problem 9a *)
+val count_wildcards = g (fn _  => 1) ( fn x => 0)
 
+(* Problem 9b *)
+val count_wild_and_variable_lengths = g (fn _ => 1) (fn x => String.size x )		    
 
+(* Problem 9c  *)
+fun count_some_var (str, p) =
+    g (fn _ => 0) (fn x => if x = str then 1 else 0) p
+
+(* Problem 10 *)
+fun check_pat p =
+    let fun extract_strings p acc =
+	    case p of
+		Variable x => x :: acc
+	      | ConstructorP (_, p') => extract_strings p' acc
+	      | TupleP ps => List.foldl (fn (x, y) => (extract_strings x acc) @ y) [] ps
+	      | _  => acc
+
+	fun is_distinct strl =
+	    case strl of
+		[] => true
+	     | s::xs' => (not (List.exists (fn x => x = s) xs')) andalso (is_distinct xs')
+    in
+	 is_distinct (extract_strings p [])
+    end
