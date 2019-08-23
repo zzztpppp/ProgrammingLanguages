@@ -116,3 +116,24 @@ fun check_pat p =
     in
 	 is_distinct (extract_strings p [])
     end
+
+(* Problem 11 *)
+fun match (v, p) =
+    case (v, p) of
+	(_, Wildcard) => SOME []
+      | (Unit, UnitP) => SOME []
+      | (v', Variable s) => SOME [(s, v')]
+      | (Const x, ConstP y) => if x = y then SOME [] else NONE
+      | (Constructor(x, y), ConstructorP(x', y')) => if x = x'
+						      then match(y, y')
+						     else NONE
+      | (Tuple (x::xs), TupleP(y::ys)) => (case (match(x, y), match(Tuple(xs), TupleP(ys))) of
+					      (SOME x', SOME y') => SOME (x'@y')
+					    | _ => NONE )
+      | (Tuple [], TupleP []) => SOME []
+      | _ => NONE 
+    
+(* Problem 12 *)
+fun first_match v ps =
+    SOME (first_answer (fn x => match(v, x)) ps) handle NoAnswer => NONE 
+    
