@@ -62,6 +62,21 @@
                                       (list-nth-mod ys x))
                                 (lambda () (f (+ x 1)))))])
     (lambda () (f 0))))
+
+
+;problem 10
+(define (cached-assoc xs n)
+  (let* ([cache (make-vector n null)]
+         [i 0])
+    (lambda (v) (let ([ans (assoc v cache)])
+                  (if ans
+                      ans
+                      (let ([new-ans (assoc v xs)])
+                        (begin
+                          (vector-set! cache i new-ans)
+                          (set! i (remainder (+ i 1) n))
+                          new-ans)))))))
+         
     
 
 
