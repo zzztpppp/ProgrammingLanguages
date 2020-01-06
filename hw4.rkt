@@ -37,8 +37,31 @@
 ;problem 5
 (define funny-number-stream
   (letrec ([f (lambda (x) (if (= (remainder x 5) 0)
-                              (cons (- x) (lambda()(f ( + (1 x)))))
-                              (cons x (lambda () (f ( + (1 x)))))))])
+                              (cons (- x) (lambda()(f (+ 1 x))))
+                              (cons x (lambda () (f (+ 1 x))))))])
            (lambda () (f 1))))
+
+
+;problem 6
+(define dan-then-dog
+  (letrec ([f (lambda (x) (cond [x(cons "dan.jpg" (lambda () (f (not x))))]
+                                [#t (cons "dog.jpg" (lambda () (f (not x))))]))])
+           (lambda() (f #t))))
+
+
+;problem 7
+(define (stream-add-zero s)
+  (letrec ([f (lambda (x) (cons (cons 0 (car (x)))
+                                (lambda () (f (cdr (x))))))])
+    (lambda () (f s))))
+
+
+;problem 8
+(define (cycle-lists xs ys)
+  (letrec ([f (lambda (x) (cons (cons (list-nth-mod xs x)
+                                      (list-nth-mod ys x))
+                                (lambda () (f (+ x 1)))))])
+    (lambda () (f 0))))
+    
 
 
