@@ -37,9 +37,31 @@
 ;problem 5
 (define funny-number-stream
   (letrec ([f (lambda (x) (if (= (remainder x 5) 0)
-                              (cons (- x) (lambda()(f ( + (1 x)))))
-                              (cons x (lambda () (f ( + (1 x)))))))])
+                              (cons (- x) (lambda()(f (+ 1 x))))
+                              (cons x (lambda () (f (+ 1 x))))))])
            (lambda () (f 1))))
+
+
+;problem 6
+(define dan-then-dog
+  (letrec ([f (lambda (x) (cond [x(cons "dan.jpg" (lambda () (f (not x))))]
+                                [#t (cons "dog.jpg" (lambda () (f (not x))))]))])
+           (lambda() (f #t))))
+
+
+;problem 7
+(define (stream-add-zero s)
+  (letrec ([f (lambda (x) (cons (cons 0 (car (x)))
+                                (lambda () (f (cdr (x))))))])
+    (lambda () (f s))))
+
+
+;problem 8
+(define (cycle-lists xs ys)
+  (letrec ([f (lambda (x) (cons (cons (list-nth-mod xs x)
+                                      (list-nth-mod ys x))
+                                (lambda () (f (+ x 1)))))])
+    (lambda () (f 0))))
 
 
 ;problem 9
@@ -52,5 +74,20 @@
                                    (vector-ref vec n)]
                                   [#t (f (+ 1 n) v)]))])
     (f 0 v)))
+
+
+;problem 10
+(define (cached-assoc xs n)
+  (let* ([cache (make-vector n null)]
+         [i 0])
+    (lambda (v) (let ([ans (assoc v cache)])
+                  (if ans
+                      ans
+                      (let ([new-ans (assoc v xs)])
+                        (begin
+                          (vector-set! cache i new-ans)
+                          (set! i (remainder (+ i 1) n))
+                          new-ans)))))))
+         
 
 
