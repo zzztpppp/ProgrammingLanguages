@@ -42,3 +42,15 @@
            (lambda () (f 1))))
 
 
+;problem 9
+(define (vector-assoc v vec)
+  (letrec ([l (vector-length vec)]
+           [f (lambda (n v) (cond [(>= n l) #f]
+                                  [(not (pair? (vector-ref vec n)))
+                                   (f ( + 1 n) v)]
+                                  [(equal? v (car (vector-ref vec n)))
+                                   (vector-ref vec n)]
+                                  [#t (f (+ 1 n) v)]))])
+    (f 0 v)))
+
+
