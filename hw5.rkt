@@ -60,6 +60,35 @@
                        (int-num v2)))
                (error "MUPL addition applied to non-number")))]
         ;; CHANGE add more cases here
+        ;; Evaluate values to themselves
+        [(or (int? e) (or (closure? e) (or (aunit? e) (pair? e)))) e]
+
+        [(ifgreater? e)
+         (let ([v1 (eval-under-env (ifgreater-e1 e) env)]
+               [v2 (eval-under-env (ifgreater-e2 e) env)])
+           (if (and (int? v1) (int? v2))
+               (if ( > (int-num v1) (int-num v2))
+                   (eval-under-env (ifgreater-e3 e env))
+                   (eval-under-env (ifgreater-e4 e env)))
+               (eval-under-env (ifgreater-e4 e env))))]
+        [(fun? e) (let ([s1 (fun-nameopt e)]
+                        [s2 (fun-formal e)]
+                        [e1 (fun-body e)])
+                    (closure (if s1 (cons (cons s1 e1) env) env) e))]
+
+        [(mlet? e) (let ([v (mlet-var e)]
+                         [e1 (mlet-e e)]
+                         [b (mlet-b e)])
+                     (if (var? v)
+                         (eval-under-env b (cons (cons (var-string v) (eval-under-env e1 env))
+                                                 env))
+                         (error "variable name has to be type var!")))]
+
+        [(call? e) (let ([clsr (
+
+        
+                     
+           
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
