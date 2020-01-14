@@ -68,9 +68,9 @@
                [v2 (eval-under-env (ifgreater-e2 e) env)])
            (if (and (int? v1) (int? v2))
                (if ( > (int-num v1) (int-num v2))
-                   (eval-under-env (ifgreater-e3 e env))
-                   (eval-under-env (ifgreater-e4 e env)))
-               (eval-under-env (ifgreater-e4 e env))))]
+                   (eval-under-env (ifgreater-e3 e) env)
+                   (eval-under-env (ifgreater-e4 e) env))
+               (eval-under-env (ifgreater-e4 e) env)))]
         [(fun? e) (let ([s1 (fun-nameopt e)]
                         [s2 (fun-formal e)]
                         [e1 (fun-body e)])
@@ -78,18 +78,34 @@
 
         [(mlet? e) (let ([v (mlet-var e)]
                          [e1 (mlet-e e)]
-                         [b (mlet-b e)])
+                         [b (mlet-body e)])
                      (if (var? v)
                          (eval-under-env b (cons (cons (var-string v) (eval-under-env e1 env))
                                                  env))
-                         (error "variable name has to be type var!")))]
+                         (error "variable names has to be type var!")))]
 
-        [(call? e) (let ([clsr (
+        [(call? e) (let ([clsr (eval-under-env (call-funexp e) env)]
+                         [arg (eval-under-env (call-actual e) env)])
+                     (if (closure? clsr)
+                         (let ([env-ext (cons (cons (fun-formal (closure-fun clsr)) arg) (closure-env clsr))]
+                               [exp (fun-body (closure-fun clsr))])
+                           (eval-under-env exp env-ext))
+                         (error (format "bad function call: ~v" e))))]
+        [(apair? e) (let ([e1 (apair-e1 e)]
+                          [e2 (apair-e2 e)])
+                      (apair (eval-under-env e1 env) (eval-under-env e2 env)))]
 
-        
-                     
-           
+        [(fst? e) (let ([r (eval-under-env (fst-e e) env)])
+                    (if (apair? r) (apair-e1) (error "can only evaluate fst on a pair")))]
+        [(snd? e) (let ([r (eval-under-env (snd-e e) env)])
+                    (if (apair? r) (apair-e2) (error "can only evaluate snd on a pair")))]
+
+        [(isaunit? e) (let ([r (eval-under-env (isaunit-e e) env)])
+                        (if (aunit? r) (int 1) (int 0)))]
+
+                                      
         [#t (error (format "bad MUPL expression: ~v" e))]))
+
 
 ;; Do NOT change
 (define (eval-exp e)
@@ -97,9 +113,16 @@
         
 ;; Problem 3
 
-(define (ifaunit e1 e2 e3) "CHANGE")
+(define (ifaunit e1 e2 e3)
+  (if (aunit? (eval-exp e1))
+      (eval-exp e2)
+      (eval-exp e3)))
 
-(define (mlet* lstlst e2) "CHANGE")
+(define (mlet* lstlst e2)
+  (let ([evn-f (lambda (ps env)
+                 (if (null? ps)
+  
+    
 
 (define (ifeq e1 e2 e3 e4) "CHANGE")
 
