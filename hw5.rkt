@@ -119,12 +119,23 @@
       (eval-exp e3)))
 
 (define (mlet* lstlst e2)
-  (let ([evn-f (lambda (ps env)
-                 (if (null? ps)
+  (letrec ([f (lambda (elst env e2) (if (null? elst)
+                                     (eval-under-env e2 env)
+                                     (let ([new-val (eval-under-env (cdr (car elst)) env)]
+                                           [new-var (car (car elst))])
+                                       (f (cdr elst) (cons (cons new-var new-val) env) e2))))])
+    (f lstlst null e2)))
   
     
 
-(define (ifeq e1 e2 e3 e4) "CHANGE")
+(define (ifeq e1 e2 e3 e4)
+  (let ([_x (eval-exp e1)]
+        [_y (eval-exp e2)])
+    (if (and (int? _x) (int? _y))
+        (if (= (int-num _x) (int-num _y))
+            (eval-exp e3)
+            (eval-exp e4))
+        (error "First 2 arguments must be <int>!"))))
 
 ;; Problem 4
 
