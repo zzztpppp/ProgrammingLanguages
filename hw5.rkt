@@ -79,10 +79,8 @@
         [(mlet? e) (let ([v (mlet-var e)]
                          [e1 (mlet-e e)]
                          [b (mlet-body e)])
-                     (if (var? v)
-                         (eval-under-env b (cons (cons (var-string v) (eval-under-env e1 env))
-                                                 env))
-                         (error "variable names has to be type var!")))]
+                         (eval-under-env b (cons (cons v (eval-under-env e1 env))
+                                                 env)))]
 
         [(call? e) (let ([clsr (eval-under-env (call-funexp e) env)]
                          [arg (eval-under-env (call-actual e) env)])
@@ -140,18 +138,16 @@
 ;; Problem 4
 
 (define mupl-map
-  (lambda (x) (if (fun? x) (letrec ([f (lambda (l)
-                                      (if (aunit? (eval-exp l))
-                                          (aunit)
-                                          (let ([r (eval-exp (call x (fst l)))])
-                                            (apair r (f (snd l))))))])
-                             f)
-                  (error " The first argument should be a function!"))))
+  (fun #f "f" (
+                    fun "app" "ml" (if   (aunit? (var "ml"))
+                                       (aunit)
+                                       (apair (call (var "f") (fst (var "ml")))
+                                              (call (var "app") (snd (var "ml"))))))))
                              
 
 (define mupl-mapAddN 
-  (mlet "map" mupl-map
-        "CHANGE (notice map is now in MUPL scope)"))
+  (mlet "map" mupl-map (fun #f "i" ( call (var "map") (fun #f "x" (add (var "x") (var "i")))))))
+        
 
 ;; Challenge Problem
 
