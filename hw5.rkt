@@ -96,9 +96,9 @@
                       (apair (eval-under-env e1 env) (eval-under-env e2 env)))]
 
         [(fst? e) (let ([r (eval-under-env (fst-e e) env)])
-                    (if (apair? r) (apair-e1) (error "can only evaluate fst on a pair")))]
+                    (if (apair? r) (apair-e1 r) (error "can only evaluate fst on a pair")))]
         [(snd? e) (let ([r (eval-under-env (snd-e e) env)])
-                    (if (apair? r) (apair-e2) (error "can only evaluate snd on a pair")))]
+                    (if (apair? r) (apair-e2 r) (error "can only evaluate snd on a pair")))]
 
         [(isaunit? e) (let ([r (eval-under-env (isaunit-e e) env)])
                         (if (aunit? r) (int 1) (int 0)))]
@@ -139,7 +139,15 @@
 
 ;; Problem 4
 
-(define mupl-map "CHANGE")
+(define mupl-map
+  (lambda (x) (if (fun? x) (letrec ([f (lambda (l)
+                                      (if (aunit? (eval-exp l))
+                                          (aunit)
+                                          (let ([r (eval-exp (call x (fst l)))])
+                                            (apair r (f (snd l))))))])
+                             f)
+                  (error " The first argument should be a function!"))))
+                             
 
 (define mupl-mapAddN 
   (mlet "map" mupl-map
