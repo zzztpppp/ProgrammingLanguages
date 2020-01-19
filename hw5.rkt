@@ -135,12 +135,10 @@
 ;; Problem 4
 
 (define mupl-map
-  (fun #f "f" (mlet "app-clsr"
-                    (fun "app" "ml" (if   (aunit? (var "ml"))
-                                       (aunit)
-                                       (apair (call (var "f") (fst (var "ml")))
-                                              (call (var "app") (snd (var "ml"))))))
-                    (var "x"))))
+  (fun #f "f" (fun "map" "ml" (ifeq (int 1) (isaunit (var "ml"))
+                                    (aunit)
+                                    (apair (call (var "f") (fst (var "ml")))
+                                           (call (var "map") (snd (var "ml")))))))) 
                     
                              
 
