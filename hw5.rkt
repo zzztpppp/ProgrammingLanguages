@@ -71,10 +71,7 @@
                    (eval-under-env (ifgreater-e3 e) env)
                    (eval-under-env (ifgreater-e4 e) env))
                (eval-under-env (ifgreater-e4 e) env)))]
-        [(fun? e) (let ([s1 (fun-nameopt e)]
-                        [s2 (fun-formal e)]
-                        [e1 (fun-body e)])
-                    (closure (if s1 (cons (cons s1 e1) env) env) e))]
+        [(fun? e) (closure env e)]
 
         [(mlet? e) (let ([v (mlet-var e)]
                          [e1 (mlet-e e)]
@@ -85,9 +82,15 @@
         [(call? e) (let ([clsr (eval-under-env (call-funexp e) env)]
                          [arg (eval-under-env (call-actual e) env)])
                      (if (closure? clsr)
+                         ;Extend the envirement with argument
                          (let ([env-ext (cons (cons (fun-formal (closure-fun clsr)) arg) (closure-env clsr))]
                                [exp (fun-body (closure-fun clsr))])
-                           (eval-under-env exp env-ext))
+                           
+                           ;Extend the envirement to the function name mapped the closure if
+                           ; the function has a name.
+                           (eval-under-env exp (if (fun-nameopt (closure-fun clsr))
+                                                   (cons (cons (fun-nameopt (closure-fun clsr)) clsr) env-ext)
+                                                   env-ext)))
                          (error (format "bad function call: ~v" e))))]
         [(apair? e) (let ([e1 (apair-e1 e)]
                           [e2 (apair-e2 e)])
@@ -112,37 +115,33 @@
 ;; Problem 3
 
 (define (ifaunit e1 e2 e3)
-  (if (aunit? (eval-exp e1))
-      (eval-exp e2)
-      (eval-exp e3)))
+  (ifgreater (isaunit e1) (int 0) e2 e3))
 
+
+      
 (define (mlet* lstlst e2)
-  (letrec ([f (lambda (elst env e2) (if (null? elst)
-                                     (eval-under-env e2 env)
-                                     (let ([new-val (eval-under-env (cdr (car elst)) env)]
-                                           [new-var (car (car elst))])
-                                       (f (cdr elst) (cons (cons new-var new-val) env) e2))))])
-    (f lstlst null e2)))
+  (if (null? lstlst)
+      e2
+      (let ([p (car lstlst)])
+        (mlet (car p) (cdr p) (mlet* (cdr lstlst) e2)))))
   
     
 
 (define (ifeq e1 e2 e3 e4)
-  (let ([_x (eval-exp e1)]
-        [_y (eval-exp e2)])
-    (if (and (int? _x) (int? _y))
-        (if (= (int-num _x) (int-num _y))
-            (eval-exp e3)
-            (eval-exp e4))
-        (error "First 2 arguments must be <int>!"))))
+  (mlet* (list (cons "_x" e1) (cons "_y" e2))
+         (ifgreater (var "_x") (var "_y") e4 (ifgreater (var "_y") (var "_x") e4 e3))))
+         
 
 ;; Problem 4
 
 (define mupl-map
-  (fun #f "f" (
-                    fun "app" "ml" (if   (aunit? (var "ml"))
+  (fun #f "f" (mlet "app-clsr"
+                    (fun "app" "ml" (if   (aunit? (var "ml"))
                                        (aunit)
                                        (apair (call (var "f") (fst (var "ml")))
-                                              (call (var "app") (snd (var "ml"))))))))
+                                              (call (var "app") (snd (var "ml"))))))
+                    (var "x"))))
+                    
                              
 
 (define mupl-mapAddN 
