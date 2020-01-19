@@ -23,15 +23,15 @@
 ;; Problem 1
 
 ;; CHANGE (put your solutions here)
-(define (racketlist rlst)
+(define (racketlist->mupllist rlst)
   (if (null? rlst)
       (aunit)
-      (apair (car rlst) (racketlist (cdr rlst)))))
+      (apair (car rlst) (racketlist->mupllist (cdr rlst)))))
 
-(define (mupllist mlst)
+(define (mupllist->racketlist mlst)
   (if (aunit? mlst)
       null
-      (cons (apair-e1 mlst) (mupllist (apair-e2 mlst)))))
+      (cons (apair-e1 mlst) (mupllist->racketlist (apair-e2 mlst)))))
       
   
 
@@ -143,7 +143,7 @@
                              
 
 (define mupl-mapAddN 
-  (mlet "map" mupl-map (fun #f "i" ( call (var "map") (fun #f "x" (add (var "x") (var "i")))))))
+  (mlet "map" mupl-map (fun #f "i" (call mupl-map (fun #f "x" (add (var "i") (var "x"))))))) 
         
 
 ;; Challenge Problem
