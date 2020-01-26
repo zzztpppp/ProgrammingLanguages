@@ -152,12 +152,19 @@
 
 ;; We will test this function directly, so it must do
 ;; as described in the assignment
-(define (compute-free-vars e) "CHANGE")
+(define (compute-free-vars e)
+  (struct rest (e v))
+  (define (helper-funcs e vars)
+    (cond ([(var? e) (rest (e 
+                                                                 
+                                                                 
+                         
+                                                             
 
 ;; Do NOT share code with eval-under-env because that will make
 ;; auto-grading and peer assessment more difficult, so
 ;; copy most of your interpreter here and make minor changes
-(define (eval-under-env-c e env) "CHANGE")
+(define (eval-under-env-c  e env) "cHANGE" )
 
 ;; Do NOT change this
 (define (eval-exp-c e)
