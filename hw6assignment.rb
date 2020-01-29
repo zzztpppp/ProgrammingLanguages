@@ -13,7 +13,7 @@ class MyPiece < Piece
                rotations([[0, 0], [0, -1], [0, 1], [-1, 1]]), # inverted L
                rotations([[0, 0], [-1, 0], [0, -1], [1, -1]]), # S
                rotations([[0, 0], [1, 0], [0, -1], [-1, -1]]), # Z
-			   rotations([[0, -1], [1, -1], [0, 0], [1, 0], [1, 1]]), # Square with tail
+			   rotations([[0, 0], [-1, 0], [0, -1], [-1, -1], [1, 0]]), # Square with tail
 			   rotations([[0, 0], [1, 0], [0, 1]]), # Square with one corner lost
 			   [[[0, -2], [0, -1], [0, 0], [0, 1], [0, 2]], 
 			   [[2, 0], [1, 0], [1, 0], [0, 0], [-1, 0], [-2, 0]]]] # Longer
