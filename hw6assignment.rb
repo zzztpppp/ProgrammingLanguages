@@ -18,7 +18,7 @@ class MyPiece < Piece
 			   [[[0, -2], [0, -1], [0, 0], [0, 1], [0, 2]], 
 			   [[2, 0], [1, 0], [1, 0], [0, 0], [-1, 0], [-2, 0]]]] # Longer
 			   
-  Cheat_Piece = [[0, 0]] # Piece for cheat
+  Cheat_Piece = [[[0, 0]]] # Piece for cheat
   # your enhancements here
   
   def self.next_piece (board)
@@ -60,9 +60,7 @@ class MyBoard < Board
   
   # Generate next piece as cheat piece
   def  next_cheat
-    if (@score >= 100)
-	  @score -= 100
-	end
+    
 	@cheat = false
     @current_block = MyPiece.cheat_piece(self)
 	@current_pos = nil
@@ -71,6 +69,9 @@ class MyBoard < Board
   
   # Switch to cheat
   def cheat
+    if (@score >= 100) and !@cheat
+	  @score -= 100
+	end
     @cheat = true
   end	
   
