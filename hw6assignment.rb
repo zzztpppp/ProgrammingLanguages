@@ -17,10 +17,18 @@ class MyPiece < Piece
 			   rotations([[0, 0], [1, 0], [0, 1]]), # Square with one corner lost
 			   [[[0, -2], [0, -1], [0, 0], [0, 1], [0, 2]], 
 			   [[2, 0], [1, 0], [1, 0], [0, 0], [-1, 0], [-2, 0]]]] # Longer
+			   
+  Cheat_Piece = [[0, 0]] # Piece for cheat
   # your enhancements here
   
   def self.next_piece (board)
     MyPiece.new(All_My_Pieces.sample, board)
+  end
+  
+  
+  # Generate a cheat piece for the board
+  def self.cheat_piece (board)
+    MyPiece.new(Cheat_Piece, board)
   end
 
 end
@@ -31,6 +39,7 @@ class MyBoard < Board
   def initialize(game)
     super
 	@current_block = MyPiece.next_piece(self)
+	@cheat = false   # If true, next piece will be a cheat piece.
   end
   
   
@@ -47,6 +56,63 @@ class MyBoard < Board
   def next_piece
     @current_block = MyPiece.next_piece(self)
     @current_pos = nil
+  end
+  
+  # Generate next piece as cheat piece
+  def  next_cheat
+    if (@score >= 100)
+	  @score -= 100
+	end
+	@cheat = false
+    @current_block = MyPiece.cheat_piece(self)
+	@current_pos = nil
+  end
+  
+  
+  # Switch to cheat
+  def cheat
+    @cheat = true
+  end	
+  
+  # Override run to support cheat mode.
+  def run
+    ran = @current_block.drop_by_one
+    if !ran
+      store_current
+      if !game_over?
+	    if @cheat
+		  next_cheat
+		else
+          next_piece
+		end
+      end
+    end
+    @game.update_score
+    draw
+  end
+  
+  
+  # Override to support cheat mode
+  def drop_all_the_way
+    if @game.is_running?
+      ran = @current_block.drop_by_one
+      @current_pos.each{|block| block.remove}
+      while ran
+        @score += 1
+        ran = @current_block.drop_by_one
+      end
+      draw
+      store_current
+      if !game_over?
+	    if @cheat
+		  next_cheat
+		else
+          next_piece
+		end
+      end
+      @game.update_score
+      draw
+    end
   end
   
   
@@ -72,6 +138,7 @@ class MyTetris < Tetris
   def key_bindings
     super
 	@root.bind('u', proc {@board.rotate_180})
+	@root.bind('c', proc {@board.cheat})
   end
   
   
