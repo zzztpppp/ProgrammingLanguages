@@ -15,8 +15,8 @@ class MyPiece < Piece
                rotations([[0, 0], [1, 0], [0, -1], [-1, -1]]), # Z
 			   rotations([[0, 0], [-1, 0], [0, -1], [-1, -1], [1, 0]]), # Square with tail
 			   rotations([[0, 0], [1, 0], [0, 1]]), # Square with one corner lost
-			   [[[0, -2], [0, -1], [0, 0], [0, 1], [0, 2]], 
-			   [[2, 0], [1, 0], [1, 0], [0, 0], [-1, 0], [-2, 0]]]] # Longer
+			   [[[0, 0], [-1, 0], [1, 0], [2, 0], [-2, 0]], 
+               [[0, 0], [0, -1], [0, 1], [0, 2], [0, -2]]]] # Longer
 			   
   Cheat_Piece = [[[0, 0]]] # Piece for cheat
   # your enhancements here
@@ -52,69 +52,28 @@ class MyBoard < Board
   end
   
   
-  # gets the my next piece
+  # Override for cheating
   def next_piece
-    @current_block = MyPiece.next_piece(self)
+    if @cheat
+	  @current_block = MyPiece.cheat_piece(self)
+	else
+      @current_block = MyPiece.next_piece(self)
+	end	
+	@cheat = false
     @current_pos = nil
   end
   
-  # Generate next piece as cheat piece
-  def  next_cheat
-    
-	@cheat = false
-    @current_block = MyPiece.cheat_piece(self)
-	@current_pos = nil
-  end
   
   
   # Switch to cheat
   def cheat
     if (@score >= 100) and !@cheat
 	  @score -= 100
+	  @cheat = true
 	end
-    @cheat = true
+    
   end	
   
-  # Override run to support cheat mode.
-  def run
-    ran = @current_block.drop_by_one
-    if !ran
-      store_current
-      if !game_over?
-	    if @cheat
-		  next_cheat
-		else
-          next_piece
-		end
-      end
-    end
-    @game.update_score
-    draw
-  end
-  
-  
-  # Override to support cheat mode
-  def drop_all_the_way
-    if @game.is_running?
-      ran = @current_block.drop_by_one
-      @current_pos.each{|block| block.remove}
-      while ran
-        @score += 1
-        ran = @current_block.drop_by_one
-      end
-      draw
-      store_current
-      if !game_over?
-	    if @cheat
-		  next_cheat
-		else
-          next_piece
-		end
-      end
-      @game.update_score
-      draw
-    end
-  end
   
   
   # Override to store blocks that has number of
