@@ -175,12 +175,10 @@ class LineSegment < GeometryValue
 	# Order two end points such that the start point is either 
 	# at the left or below the end point.
     tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y2
-	if (x1 > x2) and !real_close(x1, x2)
-	  tmp_x1, tmp_x2 = tmp_x2, tmp_x1
+	if ((x1 > x2) and !real_close(x1, x2)) or ((y1 > y2) and !real_close(y1, y2))
+	  tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x2, @y2, @x1, @y1
+    end
 	
-	elsif (y1 > y2) and !real_close(y1, y2)
-	  tmp_y1, tmp_y2 = y2, y1
-	end
 	LineSegment.new(tmp_x1, tmp_y1, tmp_x2, tmp_y2)
   end
 end
