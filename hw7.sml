@@ -209,7 +209,7 @@ fun eval_prog (e,env) =
       | Let(s,e1,e2) => eval_prog (e2, ((s, eval_prog(e1,env)) :: env))
       | Intersect(e1,e2) => intersect(eval_prog(e1,env), eval_prog(e2, env))
 (* CHANGE: Add a case for Shift expressions *)
-      | Shift (x1, y1, e1) => shift (x1, x2, eval_prog(e1, env))
+      | Shift (x1, y1, e1) => shift (x1, y1, eval_prog(e1, env))
 
 (* CHANGE: Add function preprocess_prog of type geom_exp -> geom_exp *)
 fun preprocess_prog (e) = 
