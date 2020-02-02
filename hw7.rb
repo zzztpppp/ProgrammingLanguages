@@ -104,6 +104,9 @@ class NoPoints < GeometryValue
   def intersectWithSegmentAsLineResult seg
     self
   end
+  def preprocess_prog
+    NoPoints.new
+  end
 end
 
 
@@ -118,6 +121,9 @@ class Point < GeometryValue
     @x = x
     @y = y
   end
+  def preprocess_prog
+    Point.new(@x, @y)
+  end
 end
 
 class Line < GeometryValue
@@ -128,6 +134,10 @@ class Line < GeometryValue
     @m = m
     @b = b
   end
+  
+  def preprocess_prog
+    Line.new (@m, @b)
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -136,6 +146,9 @@ class VerticalLine < GeometryValue
   attr_reader :x
   def initialize x
     @x = x
+  end
+  def preprocess_prog
+    VerticalLine.new(@x)
   end
 end
 
@@ -151,6 +164,24 @@ class LineSegment < GeometryValue
     @y1 = y1
     @x2 = x2
     @y2 = y2
+  end
+  def preprocess_prog
+    # No line segment has two real close end points, 
+	# if that is the case, turn the line segment to a point.
+	if real_close_point(x1, y1, x2, y2)
+	  return Point.new(x1, y1)
+	end
+	
+	# Order two end points such that the start point is either 
+	# at the left or below the end point.
+    tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y2
+	if (x1 > x2) and !real_close(x1, x2)
+	  tmp_x1, tmp_x2 = tmp_x2, tmp_x1
+	end
+	if (y1 > y2) and !real_close(y1, y2)
+	  tmp_y1, tmp_y2 = y2, y1
+	end
+	LineSegment.new(tmp_x1, tmp_y1, tmp_x2, tmp_y2)
   end
 end
 
@@ -174,6 +205,13 @@ class Let < GeometryExpression
     @e1 = e1
     @e2 = e2
   end
+  
+  # Method to preprocess the expression
+  def preprocess_prog
+    p_e1 = @e1.preprocess_prog
+	p_e2 = @e2.preprocess_prog
+	Let.new(@s, p_e1, p_e2)
+  end
 end
 
 class Var < GeometryExpression
@@ -187,6 +225,12 @@ class Var < GeometryExpression
     raise "undefined variable" if pr.nil?
     pr[1]
   end
+  
+  # Trivil case of preprocessing
+  def preprocess_prog
+    Var.new(@s)
+  end
+    
 end
 
 class Shift < GeometryExpression
@@ -196,5 +240,9 @@ class Shift < GeometryExpression
     @dx = dx
     @dy = dy
     @e = e
+  end
+  
+  def preprocess_prog
+    Shift.new(dx, dy, e.preprocess_prog)
   end
 end
