@@ -178,7 +178,7 @@ fun intersect (v1,v2) =
 (* helper function for interpreter: return the geom_exp shifted by (x, y) *)
 fun shift (x, y, e) = 
     case e of 
-	NoPoints => 
+	NoPoints => e
 	  | Point (x1, y1) => Point(x1 + x, y1 + y)
 	  | Line (m, b) => Line (m, b + y - m*x)
 	  | VerticalLine x1 => VerticalLine (x + x1)
