@@ -107,6 +107,11 @@ class NoPoints < GeometryValue
   def preprocess_prog
     NoPoints.new
   end
+  
+  # Evaluates self to the result expression
+  def eval_prog env
+    NoPoints.new
+  end
 end
 
 
@@ -124,6 +129,9 @@ class Point < GeometryValue
   def preprocess_prog
     Point.new(@x, @y)
   end
+  def eval_prog env
+    Point.new(x, y) 
+  end
 end
 
 class Line < GeometryValue
@@ -138,6 +146,10 @@ class Line < GeometryValue
   def preprocess_prog
     Line.new(@m, @b)
   end
+  
+  def eval_prog env
+    Line.new(@m, @b)
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -149,6 +161,9 @@ class VerticalLine < GeometryValue
   end
   def preprocess_prog
     VerticalLine.new(@x)
+  end
+  def eval_prog env
+    VerticalLine @x
   end
 end
 
@@ -181,6 +196,9 @@ class LineSegment < GeometryValue
 	
 	LineSegment.new(tmp_x1, tmp_y1, tmp_x2, tmp_y2)
   end
+  def eval_prog env
+    LineSegment(x1, y1, x2, y2)
+  end
 end
 
 # Note: there is no need for getter methods for the non-value classes
@@ -209,6 +227,10 @@ class Let < GeometryExpression
     p_e1 = @e1.preprocess_prog
 	p_e2 = @e2.preprocess_prog
 	Let.new(@s, p_e1, p_e2)
+  end
+  def eval_prog env
+    new_env = [[s, (e1.eval_prog env)] + env]
+	e2.eval_prog new_env
   end
 end
 
@@ -242,5 +264,9 @@ class Shift < GeometryExpression
   
   def preprocess_prog
     Shift.new(dx, dy, e.preprocess_prog)
+  end
+  
+  def eval_prog env
+    Shift.new(dx, dy, (e.eval_prog env))
   end
 end
