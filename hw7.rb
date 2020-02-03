@@ -129,6 +129,17 @@ class Point < GeometryValue
   def shift(dx, dy)
     Point(x + dx, y + dy)
   end
+  
+  def intersect other
+    other.intersectPoint self
+  end
+  def intersectPoint p
+    if real_close_point(x, y, p::x, p::y)
+	  p
+	else
+	  NoPoints.new
+	end
+  end 
 
 end
 
@@ -152,6 +163,9 @@ class Line < GeometryValue
   def shift(dx, dy)
     Line(m, b + dy - m*dx)
   end
+  def intersect other
+    other.intersectLine self
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -163,6 +177,9 @@ class VerticalLine < GeometryValue
   end
   def shift(dx, dy)
     VerticalLine (x + dx)
+  end
+  def intersect other
+    other.intersectVerticalLine self
   end
 
 end
@@ -203,6 +220,10 @@ class LineSegment < GeometryValue
   def shift(dx, dy)
     LineSegment(x1+dx, y1+dy, x2+dx, y2+dy)
   end	
+  
+  def intersect other
+    other.intersectLineSegment self
+  end
 end
 
 # Note: there is no need for getter methods for the non-value classes
@@ -213,6 +234,12 @@ class Intersect < GeometryExpression
   def initialize(e1,e2)
     @e1 = e1
     @e2 = e2
+  end
+  def preprocess_prog 
+    Intersect(e1.preprocess_prog, e2.preprocess_prog)
+  end
+  def eval_prog env
+    e1.intersect e2
   end
 end
 
