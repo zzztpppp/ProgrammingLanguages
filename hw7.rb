@@ -104,14 +104,8 @@ class NoPoints < GeometryValue
   def intersectWithSegmentAsLineResult seg
     self
   end
-  def preprocess_prog
-    NoPoints.new
-  end
   
-  # Evaluates self to the result expression
-  def eval_prog env
-    NoPoints.new
-  end
+
 end
 
 
@@ -126,12 +120,7 @@ class Point < GeometryValue
     @x = x
     @y = y
   end
-  def preprocess_prog
-    Point.new(@x, @y)
-  end
-  def eval_prog env
-    Point.new(x, y) 
-  end
+
 end
 
 class Line < GeometryValue
@@ -159,12 +148,7 @@ class VerticalLine < GeometryValue
   def initialize x
     @x = x
   end
-  def preprocess_prog
-    VerticalLine.new(@x)
-  end
-  def eval_prog env
-    VerticalLine @x
-  end
+
 end
 
 class LineSegment < GeometryValue
