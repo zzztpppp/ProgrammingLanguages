@@ -68,6 +68,11 @@ class GeometryValue
     line_result = intersect(two_points_to_line(seg.x1,seg.y1,seg.x2,seg.y2))
     line_result.intersectWithSegmentAsLineResult seg
   end
+  
+  # Shift a geometry value by (x, y)
+  def shift (dx, dy)
+    self          # Default behavior, returns it self
+  end
 end
 
 class NoPoints < GeometryValue
@@ -120,6 +125,10 @@ class Point < GeometryValue
     @x = x
     @y = y
   end
+  
+  def shift(dx, dy)
+    Point(x + dx, y + dy)
+  end
 
 end
 
@@ -139,6 +148,10 @@ class Line < GeometryValue
   def eval_prog env
     Line.new(@m, @b)
   end
+  
+  def shift(dx, dy)
+    Line(m, b + dy - m*dx)
+  end
 end
 
 class VerticalLine < GeometryValue
@@ -147,6 +160,9 @@ class VerticalLine < GeometryValue
   attr_reader :x
   def initialize x
     @x = x
+  end
+  def shift(dx, dy)
+    VerticalLine (x + dx)
   end
 
 end
@@ -183,6 +199,10 @@ class LineSegment < GeometryValue
   def eval_prog env
     LineSegment(x1, y1, x2, y2)
   end
+  
+  def shift(dx, dy)
+    LineSegment(x1+dx, y1+dy, x2+dx, y2+dy)
+  end	
 end
 
 # Note: there is no need for getter methods for the non-value classes
@@ -251,6 +271,7 @@ class Shift < GeometryExpression
   end
   
   def eval_prog env
-    Shift.new(dx, dy, (e.eval_prog env))
+    e_res = (e.eval_prog env)
+	e_res.shift(dx, dy)
   end
 end
