@@ -278,6 +278,15 @@ class LineSegment < GeometryValue
   def intersect other
     other.intersectLineSegment self
   end
+  def intersectPoint p
+    p.intersectLineSegment self
+  end
+  def intersectLine line
+    line.intersectLineSegment self
+  end
+  def intersectVerticalLine vline
+    vline.intersectLineSegment self
+  end
   def intersectWithSegmentAsLineResult seg
     x1_start, y1_start, x1_end, y1_end = @x1, @y1, @x2, @y2
 	x2_start, y2_start, x2_end, y2_end = seg.x1, seg.y1, seg.x2, seg.y2
