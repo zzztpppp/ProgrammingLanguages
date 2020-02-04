@@ -154,6 +154,13 @@ class Point < GeometryValue
 	  NoPoints.new
 	end
   end
+  def intersectWithSegmentAsLineResult seg
+     if (x > seg.x1) and (x < seg.x2)
+	   self
+	 else
+	   NoPoints.new
+	 end
+  end
 end
 
 class Line < GeometryValue
@@ -190,13 +197,16 @@ class Line < GeometryValue
       	  return NoPoints
 	  end
 	else
-	    inter_x = (b - line::b)\ (line::m - m)
+	    inter_x = (b - line.b)/(line.m - m)
 		inter_y = m*inter_x + b
 		Point(inter_x, inter_y)
 	end
   end
   def intersectVerticalLine vline
     Point(vline::x, m*vline::x + b)
+  end
+  def intersectWithSegmentAsLineResult seg
+    seg
   end
 end
 
@@ -226,6 +236,9 @@ class VerticalLine < GeometryValue
 	  NoPoints.new
 	end
   end
+  def intersectWithSegmentAsLineResult seg
+    seg
+  end
 
 end
 
@@ -251,7 +264,7 @@ class LineSegment < GeometryValue
 	
 	# Order two end points such that the start point is either 
 	# at the left or below the end point.
-    tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y2
+    tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y
 	if ((x1 > x2) and !real_close(x1, x2)) or ((y1 > y2) and !real_close(y1, y2))
 	  tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x2, @y2, @x1, @y1
     end
@@ -269,6 +282,52 @@ class LineSegment < GeometryValue
   def intersect other
     other.intersectLineSegment self
   end
+  def intersectWithSegmentAsLineResult seg
+    x1_start, y1_start, x1_end, y1_end = x1, y1, x2, y2
+	x2_start, y2_start, x2_end, y2_end = seg.x1, seg.y1, seg.x2, seg.y2
+	
+	if real_close(x1_start, x1_end)
+	  # The line segment is on a vertical line
+	  # let segment a start at or below start of segment be
+	  seg_a, seg_b = [[x1_start, y1_start, x1_end, y1_end], [x2_start, y2_start, x2_end, y2_end]]
+      if y2_start > y1_start
+	    seg_a, seg_b = [seg_b, seg_a]
+	  end
+	  ax_start, ay_start, ax_end, ay_end, bx_start, by_start, bx_end, by_end = seg_a + seg_b
+	  if real_close(ay_end, by_start)
+	    # Just touching
+	    return Point.new(ax_end, ay_end)
+	  elsif ay_end < by_start
+	    # Disjoint
+	    return NoPoints.new
+	  elsif ay_end > by_end
+	    # b inside a
+		return LineSegment.new(bx_start, by_start, bx_end, by_end)
+	  else 
+	    # Overlapping
+		return LineSegment.new(bx_start, by_start, ax_end, ay_end)
+	  end
+	else # the segments are not on a vertical line
+	     # let a start at or to the left of start of segment be
+	  seg_a, seg_b = [[x1_start, y1_start, x1_end, y1_end], [x2_start, y2_start, x2_end, y2_end]]
+	  if x2_start < x1_start
+	    seg_b, seg_a = [seg_a, seg_b]
+      end
+	  if real_close(ax_end, bx_start)
+	    # Just touching
+		return Point.new(ax_end, ay_end)
+	  elsif ax_end < bx_start
+	    # Disjoint
+		return NoPoints.new
+	  elsif ax_end > bx_end
+	    # b in a
+		return LineSegment.new(bx_start, by_start, bx_end, by_end)
+	  else
+	    # Overlapping
+		return LineSegment.new(bx_start, by_start, ax_end, ay_end)
+	  end
+	end
+  end	    	  
 end
 
 # Note: there is no need for getter methods for the non-value classes
