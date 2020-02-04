@@ -73,6 +73,12 @@ class GeometryValue
   def shift (dx, dy)
     self          # Default behavior, returns it self
   end
+  def preprocess_prog
+    self
+  end
+  def eval_prog env
+    self
+  end
 end
 
 class NoPoints < GeometryValue
@@ -127,7 +133,7 @@ class Point < GeometryValue
   end
   
   def shift(dx, dy)
-    Point(x + dx, y + dy)
+    Point.new(x + dx, y + dy)
   end
   
   def intersect other
@@ -161,6 +167,7 @@ class Point < GeometryValue
 	   NoPoints.new
 	 end
   end
+    
 end
 
 class Line < GeometryValue
@@ -172,16 +179,8 @@ class Line < GeometryValue
     @b = b
   end
   
-  def preprocess_prog
-    Line.new(@m, @b)
-  end
-  
-  def eval_prog env
-    Line.new(@m, @b)
-  end
-  
   def shift(dx, dy)
-    Line(m, b + dy - m*dx)
+    Line.new(m, b + dy - m*dx)
   end
   def intersect other
     other.intersectLine self
@@ -194,12 +193,12 @@ class Line < GeometryValue
 	  if real_close(b, line::b)
 	    return line
       else
-      	  return NoPoints
+      	  return NoPoints.new
 	  end
 	else
 	    inter_x = (b - line.b)/(line.m - m)
 		inter_y = m*inter_x + b
-		Point(inter_x, inter_y)
+		Point.new(inter_x, inter_y)
 	end
   end
   def intersectVerticalLine vline
@@ -218,7 +217,7 @@ class VerticalLine < GeometryValue
     @x = x
   end
   def shift(dx, dy)
-    VerticalLine (x + dx)
+    VerticalLine.new(x + dx)
   end
   def intersect other
     other.intersectVerticalLine self
@@ -264,26 +263,23 @@ class LineSegment < GeometryValue
 	
 	# Order two end points such that the start point is either 
 	# at the left or below the end point.
-    tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y
+    tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x1, @y1, @x2, @y2
 	if ((x1 > x2) and !real_close(x1, x2)) or ((y1 > y2) and !real_close(y1, y2))
 	  tmp_x1, tmp_y1, tmp_x2, tmp_y2 = @x2, @y2, @x1, @y1
     end
 	
 	LineSegment.new(tmp_x1, tmp_y1, tmp_x2, tmp_y2)
   end
-  def eval_prog env
-    LineSegment(x1, y1, x2, y2)
-  end
   
   def shift(dx, dy)
-    LineSegment(x1+dx, y1+dy, x2+dx, y2+dy)
+    LineSegment.new(x1+dx, y1+dy, x2+dx, y2+dy)
   end	
   
   def intersect other
     other.intersectLineSegment self
   end
   def intersectWithSegmentAsLineResult seg
-    x1_start, y1_start, x1_end, y1_end = x1, y1, x2, y2
+    x1_start, y1_start, x1_end, y1_end = @x1, @y1, @x2, @y2
 	x2_start, y2_start, x2_end, y2_end = seg.x1, seg.y1, seg.x2, seg.y2
 	
 	if real_close(x1_start, x1_end)
@@ -313,6 +309,8 @@ class LineSegment < GeometryValue
 	  if x2_start < x1_start
 	    seg_b, seg_a = [seg_a, seg_b]
       end
+	  ax_start, ay_start, ax_end, ay_end, bx_start, by_start, bx_end, by_end = seg_a + seg_b
+	  
 	  if real_close(ax_end, bx_start)
 	    # Just touching
 		return Point.new(ax_end, ay_end)
@@ -340,10 +338,10 @@ class Intersect < GeometryExpression
     @e2 = e2
   end
   def preprocess_prog 
-    Intersect(e1.preprocess_prog, e2.preprocess_prog)
+    Intersect.new(@e1.preprocess_prog, @e2.preprocess_prog)
   end
   def eval_prog env
-    e1.intersect e2
+    (@e1.eval_prog env).intersect (@e2.eval_prog env)
   end
 end
 
@@ -364,8 +362,8 @@ class Let < GeometryExpression
 	Let.new(@s, p_e1, p_e2)
   end
   def eval_prog env
-    new_env = [[s, (e1.eval_prog env)] + env]
-	e2.eval_prog new_env
+    new_env = [[@s, (@e1.eval_prog env)]] + env
+	@e2.eval_prog new_env
   end
 end
 
@@ -383,7 +381,7 @@ class Var < GeometryExpression
   
   # Trivil case of preprocessing
   def preprocess_prog
-    Var.new(@s)
+    self
   end
     
 end
@@ -398,11 +396,11 @@ class Shift < GeometryExpression
   end
   
   def preprocess_prog
-    Shift.new(dx, dy, e.preprocess_prog)
+    Shift.new(@dx, @dy, @e.preprocess_prog)
   end
   
   def eval_prog env
-    e_res = (e.eval_prog env)
-	e_res.shift(dx, dy)
+    e_res = (@e.eval_prog env)
+	e_res.shift(@dx, @dy)
   end
 end
