@@ -161,7 +161,7 @@ class Point < GeometryValue
 	end
   end
   def intersectWithSegmentAsLineResult seg
-     if (x > seg.x1) and (x < seg.x2)
+     if (real_close(@x, seg.x1) or (@x > seg.x1)) and (real_close(@x, seg.x2) or (@x < seg.x2))
 	   self
 	 else
 	   NoPoints.new
